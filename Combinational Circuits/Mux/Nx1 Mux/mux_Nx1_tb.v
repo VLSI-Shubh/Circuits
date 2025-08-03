@@ -1,24 +1,17 @@
 `timescale 1ns / 1ns
+`include "mux_Nx1.v"
 
 module mux_Nx1_tb;
 
-  // Parameters matching DUT
   parameter N = 8;
   parameter WIDTH = 8;
-
-  // Calculate select width (number of bits needed to select N inputs)
   localparam SEL_WIDTH = $clog2(N);
 
-  // Concatenated inputs: N inputs each WIDTH bits wide, total N*WIDTH bits
   reg [N*WIDTH-1:0] in;
-
-  // Select line to choose which input to output
   reg [SEL_WIDTH-1:0] sel;
-
-  // Output from mux
   wire [WIDTH-1:0] out;
 
-  // Instantiate the mux_Nx1 module
+  // Instantiate the DUT
   mux_Nx1 #(
     .N(N),
     .WIDTH(WIDTH)
@@ -29,44 +22,35 @@ module mux_Nx1_tb;
   );
 
   integer i;
+
   initial begin
     $dumpfile("mux_Nx1_tb.vcd");
-    $dumpvars(0, mux_Nx1_tb);
+    $dumpvars(1, mux_Nx1_tb);         
+    $dumpvars(1, uut);               
 
-    // Initialize inputs
-    in = 0;
-    sel = 0;
+    // Assign distinct values to all 8 inputs for clarity in waveform
+    in[7*WIDTH +: WIDTH] = 8'hAA;
+    in[6*WIDTH +: WIDTH] = 8'hBB;
+    in[5*WIDTH +: WIDTH] = 8'hCC;
+    in[4*WIDTH +: WIDTH] = 8'hDD;
+    in[3*WIDTH +: WIDTH] = 8'h11;
+    in[2*WIDTH +: WIDTH] = 8'h22;
+    in[1*WIDTH +: WIDTH] = 8'h33;
+    in[0*WIDTH +: WIDTH] = 8'h44;
 
-    #5;
-    
-    // Test each input by setting that input slice to a unique value,
-    // others zero, select corresponding input, and check output
+    // Wait for GTKWave to load initial values
+    #10;
+
+
     for (i = 0; i < N; i = i + 1) begin
-      // Clear all inputs
-      in = 0;
-
-      // Set input i slice to a pattern: e.g., input_i = {WIDTH{1'b1}} reversed with index to be unique
-      // For a simple test, set each input slice to a value equal to i repeated or shifted
-      in[i*WIDTH +: WIDTH] = {WIDTH{1'b0}} + i; // Just assign integer i in that slice
-      
       sel = i;
-      #10;
-      $display("Time %0t | sel=%0d | in[%0d]=%0h | out=%0h",
-                $time, sel, sel, in[sel*WIDTH +: WIDTH], out);
+      #20; 
     end
 
-    // Additional random test
-    in = {8'hAA, 8'hBB, 8'hCC, 8'hDD, 8'h11, 8'h22, 8'h33, 8'h44};
-    sel = 4;
-    #10;
-    $display("Time %0t | sel=%0d | in[4]=%0h | out=%0h", $time, sel, in[sel*WIDTH +: WIDTH], out);
 
-    // Finish simulation
-    #10 $finish;
-  end
+    #20;
 
-  initial begin
-    $monitor("Monitor at time %0t: sel=%0d, out=%0h", $time, sel, out);
+    $finish;
   end
 
 endmodule
