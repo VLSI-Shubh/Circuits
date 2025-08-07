@@ -22,7 +22,7 @@ Each module typically includes:
 - Well-documented Verilog code
 - Testbenches for functional simulation
 - Output waveforms (via `.vcd` or `.png`)
-- Optional synthesis reports (if applicable)
+- Optional synthesis reports 
 
 For specific implementation details, please refer to the corresponding folders.
 
